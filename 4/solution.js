@@ -8,5 +8,35 @@ const config = {
 };
 
 // BEGIN (write your solution here)
+const transaction = async (user, roomNumber, price) => {
+  const sql = postgres(config);
+  try {
+    return await sql.begin(async (sql) => {
+      const [userRecord] = await sql`
+        INSERT INTO users ${sql(user, "username", "phone" )} 
+        RETURNING id
+      `;
+      const userId = userRecord.id;
 
+      const [roomRecord] = await sql`
+        SELECT id FROM rooms 
+        WHERE room_number = ${roomNumber}
+      `;
+      const roomId = roomRecord.id;
+
+      await sql`
+        INSERT INTO orders (user_id, room_id, price) 
+        VALUES (${userId}, ${roomId}, ${price})
+      `;
+
+      await sql`
+      UPDATE rooms SET status = 'reserved' 
+      WHERE id = ${roomId}`;
+    });
+  } finally {
+    await sql.end();
+  }
+};
+
+export default transaction;
 // END

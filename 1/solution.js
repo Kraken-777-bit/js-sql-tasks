@@ -8,5 +8,17 @@ const config = {
 };
 
 // BEGIN (write your solution here)
+const createTable = async () => {
+  const sql = postgres(config);
 
+  await sql`
+    CREATE TABLE articles(title VARCHAR(255), description VARCHAR(255))
+  `;
+  await sql`
+    INSERT INTO articles(title, description) VALUES ('Пример статьи', 'Это тестовое описание')
+  `;
+  await sql.end()
+}
+
+export default createTable;
 // END
